@@ -1,6 +1,92 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "grafo.h"
+struct graph
+{
+   int V;
+   int A;
+   int **adj;
+};
+static int **MATRIXint(int r, int c, int val)
+{
+   vertex i, j;
+   int **m = malloc(r * sizeof(int *));
+   for (i = 0; i < r; ++i)
+      m[i] = malloc(c * sizeof(int));
+   for (i = 0; i < r; ++i)
+      for (j = 0; j < c; ++j)
+         m[i][j] = val;
+   return m;
+}
+
+Graph GRAPHinit(int V)
+{
+   Graph G = malloc(sizeof *G);
+   G->V = V;
+   G->A = 0;
+   G->adj = MATRIXint(V, V, 0);
+   return G;
+}
+
+void GRAPHinsertArc(Graph G, vertex v, vertex w)
+{
+
+   if (G == NULL)
+      return;
+   if (v < 0 || v >= G->V)
+      return;
+   if (w < 0 || w >= G->V)
+      return;
+
+   if (G->adj[v][w] == 0)
+   {
+      G->adj[v][w] = 1;
+      G->A++;
+   }
+}
+
+void GRAPHremoveArc(Graph G, vertex v, vertex w)
+{
+   if (G == NULL)
+      return;
+   if (v < 0 || v >= G->V)
+      return;
+   if (w < 0 || w >= G->V)
+      return;
+
+   if (G->adj[v][w] != 0)
+   {
+      G->adj[v][w] = 0;
+      G->A--;
+   }
+}
+
+void GRAPHshow(Graph G)
+{
+   vertex v, w;
+   for (v = 0; v < G->V; v++)
+   {
+      printf("%d:", v);
+      for (w = 0; w < G->V; ++w)
+      {
+         printf(" %d", G->adj[v][w]);
+      }
+      printf("\n");
+   }
+   printf("Vértices: %d Arestas: %d\n", G->V, G->A);
+}
+
+void GRAPHleitura(Graph G, int m)
+{
+   int a, b;
+   while (m--)
+   {
+      scanf("%d %d", &a, &b);
+      GRAPHinsertArc(G, a, b);
+      GRAPHinsertArc(G, b, a);
+   }
+   }
 
 typedef struct no{
 	int dado;
@@ -87,15 +173,8 @@ printf("\nLista de Adjacencia:\n");
 	return 1;
 }
 //-----------------------------------------------------
-int verifiqvizinhosMatriz(int n,int vi, int vj){
-  int ma[n][n];
-  printf("Escreva a matriz de adjacência:\n");
-  for(int i = 0; i<n;i++){
-    for(int j = 0; j<n;j++){
-      scanf("%i", &ma[i][j]);
-  }
-  }
-  if(ma[vi][vj] == 1){
+int verifiqvizinhosMatriz(int vi, int vj, Graph ma){
+  if(ma->adj[vi][vj]== 1){
     printf("\n[Os vertices Vi[%i] e Vj[%i] sao vizinhos!]",vi,vj);
   }else{
     printf("\n[Os vertices Vi[%i] e Vj[%i] nao sao vizinhos!]",vi,vj);
@@ -103,34 +182,18 @@ int verifiqvizinhosMatriz(int n,int vi, int vj){
   }
   return 1;
 }
-void conjVizMatriz(int n,int vi){
-  int ma[n][n];
-  printf("Escreva a matriz de adjacência:\n");
-  for(int i = 0; i<n;i++){
-    for(int j = 0; j<n;j++){
-      scanf("%i", &ma[i][j]);
-  }
-  }
+void conjVizMatriz(int n,int vi,Graph ma){
+
   printf("\nVizinhos do vertice Vi=[%i]:{ ",vi);
   for(int j = 0; j<n;j++){
-      if(ma[vi][j]==1){
+      if(ma->adj[vi][j]==1){
         printf("%i, ",j);
       }
   }
   printf("}\n");
 
-  printf("\n matriz de adjacência de entrada:");
-    printf("\n  ");
-    for(int j = 0; j<n;j++){
-      printf(" %i",j);
-    }
-    for(int i = 0; i<n;i++){
-      printf("\n%i: ",i);
-      for(int j = 0; j<n;j++){
-        printf("%i ", ma[i][j]);
-  }
-    }
 }
+
 //-----------------------------------------------------
 int conjVizList(int m, int vi){
   Lista *lista[m];
@@ -221,10 +284,6 @@ printf("}\n");
 int menu(){
     int opc;
     system("clear");
-    printf("A matriz deve ser preenchida desta forma:");
-    printf("\n0 1 0 1 1\n1 0 1 1 1\n0 1 0 1 0\n1 1 1 0 1 \n1 1 0 1 0\n\n");
-    printf("A lista deve ser preenchida desta forma:");
-    printf("\n0\n1\n0\n1\n1\n1\n0\n1\n1\n1\n0\n1\n0\n1\n0\n1\n1\n1\n0\n1 \n1\n1\n0\n1\n0");
     printf("\n\n\n[0] - Sair.\n");
     printf("[1] - Vizinhos de um vertice em uma matriz\n");
     printf("[2] - Verificar vizinhaca a partir de dois vertices em uma matriz.\n");
@@ -238,26 +297,29 @@ int menu(){
 int main(void) {
   int opc,n,m,num, vi, vj;
   int ma[m][m];
+  Graph G;
   
    while (opc=menu()){
      system("clear");
         switch (opc){
         case 1:
-          printf("Digite a quantidade de vertices para preeencher a matriz:\n");
-          scanf("%i", &m);
-          system("clear");
+          scanf("%d %d",&n,&m);
+          G=GRAPHinit(n);
+          GRAPHleitura(G,m);
+          GRAPHshow(G);
           printf("Digite o vertices para a encontrar seus vizinhos \n");
           scanf("%i", &vi);
-          conjVizMatriz(m,vi);
+          conjVizMatriz(m,vi,G);
           
             break;
         case 2:
-          printf("Digite a quantidade de vertices para preeencher a matriz:\n");
-          scanf("%i", &m);
-          system("clear");
+          scanf("%d %d",&n,&m);
+          G=GRAPHinit(n);
+          GRAPHleitura(G,m);
+          GRAPHshow(G);
           printf("Digite dois vertices para a verificacao de adjacencia\n[separado por espaco]: \n");
           scanf("%i %i", &vi,&vj);
-          verifiqvizinhosMatriz(m,vi,vj);
+          verifiqvizinhosMatriz(vi,vj,G);
             break;
         case 3:
            printf("Digite a quantidade de vertices para preeencher a lista:\n");
