@@ -162,3 +162,15 @@ void GRAPHleitura(Graph G, int m)
       GRAPHinsertArc(G, a, b);
    }
 }
+int main(void) {
+  int n,m;
+  int sc[100];
+  Graph G;
+  scanf("%d %d",&n,&m);
+  G = GRAPHinit(n);
+  GRAPHleitura(G, m);
+  GRAPHshow(G);
+  int k = GRAPHstrongCompsK(G,sc);
+  printf("\n= %d",k);
+
+}
